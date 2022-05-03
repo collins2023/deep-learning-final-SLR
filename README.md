@@ -1,1 +1,1 @@
-# deep-learning-final-SLR
+# Sign Language Recognition
