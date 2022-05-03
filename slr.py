@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 from preprocess import get_data
 
 # Sign Language Recognition
@@ -23,20 +22,26 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(29, activation='softmax')
+    tf.keras.layers.Dense(num_classes, activation='softmax')
 ])
+
 
 def main():
     train_generator, validation_generator = get_data()
     model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['sparse_categorical_accuracy'])
 
-    model.fit_generator(train_generator,
-                        steps_per_epoch=100,
-                        epochs=10,
-                        validation_data=validation_generator,
-                        validation_steps=10)
+    STEP_SIZE_TRAIN = train_generator.n//train_generator.batch_size
+    STEP_SIZE_VALID = validation_generator.n//validation_generator.batch_size
+    model.fit(train_generator,
+              steps_per_epoch=STEP_SIZE_TRAIN,
+              epochs=10,
+              validation_data=validation_generator,
+              validation_steps=STEP_SIZE_VALID)
+
+    model.evaluate(validation_generator, steps=STEP_SIZE_VALID)
+
 
 if __name__ == '__main__':
     main()
