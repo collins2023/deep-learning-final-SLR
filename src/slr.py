@@ -1,5 +1,6 @@
 import tensorflow as tf
 from preprocess import get_data
+import datetime
 
 # Sign Language Recognition
 
@@ -41,15 +42,19 @@ def train(model, train_generator, validation_generator, epochs, load_weights=Fal
                                                      save_weights_only=True,
                                                      verbose=1)
 
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=log_dir, histogram_freq=1)
+
     if load_weights:
-        model.load_weights(checkpoint_path)
+        model.load_weights(checkpoint_path).expect_partial()
     if epochs > 0:
         model.fit(train_generator,
                   steps_per_epoch=STEP_SIZE_TRAIN,
                   epochs=epochs,
                   validation_data=validation_generator,
                   validation_steps=STEP_SIZE_VALID,
-                  callbacks=[cp_callback])
+                  callbacks=[cp_callback, tensorboard_callback])
 
 
 def test(model, validation_generator):
